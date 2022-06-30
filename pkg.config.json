@@ -1,0 +1,16 @@
+{
+	"file": "app.js",
+	"icon": "assets/app.ico",
+	"name": "vRY-configurator",
+	"description": "Config editor for vRY",
+	"company": "vRY",
+	"version": "1.0.0",
+	"copyright": "vRY2022",
+	"pkg": {
+		"targets": [
+			"node16-win-x64"
+		],
+		"outputPath": "bin",
+		"assets": []
+	}
+}
