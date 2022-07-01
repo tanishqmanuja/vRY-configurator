@@ -1,9 +1,9 @@
-const inquirer = require("inquirer");
+const { prompt, registerPrompt } = require("inquirer");
 const inquirerPrompt = require("inquirer-autocomplete-prompt");
-const fuzzy = require("fuzzy");
+const { filter } = require("fuzzy");
 const { readFileSync, writeFileSync } = require("fs");
 const { join } = require("path");
-const { cwd } = require("process");
+const { cwd, stdin } = require("process");
 
 const CONFIG_PATH = join(cwd(), "./config.json");
 
@@ -38,7 +38,7 @@ const TABLE_OPTS = {
 	peakrank: "Peak Rank",
 };
 
-inquirer.registerPrompt("autocomplete", inquirerPrompt);
+registerPrompt("autocomplete", inquirerPrompt);
 
 const readJSONSync = filepath => {
 	try {
@@ -59,7 +59,7 @@ const writeJSONSync = (filepath, data) => {
 };
 
 const searchWeapons = (input = "") =>
-	fuzzy.filter(input, WEAPONS).map(el => el.original);
+	filter(input, WEAPONS).map(el => el.original);
 
 const main = async () => {
 	const configDefault = {
@@ -76,7 +76,7 @@ const main = async () => {
 
 	let configOriginal = readJSONSync(CONFIG_PATH) || configDefault;
 
-	const config = await inquirer.prompt([
+	const config = await prompt([
 		{
 			type: "autocomplete",
 			name: "weapon",
@@ -92,20 +92,20 @@ const main = async () => {
 				value: key,
 				checked: configOriginal?.table?.[key] ?? true,
 			})),
+			filter: table =>
+				Object.keys(TABLE_OPTS).reduce(
+					(obj, key) => ({ ...obj, [key]: table.includes(key) }),
+					{}
+				),
 		},
 	]);
-
-	config.table = Object.keys(TABLE_OPTS).reduce(
-		(obj, key) => ({ ...obj, [key]: config.table.includes(key) }),
-		{}
-	);
 
 	writeJSONSync(CONFIG_PATH, { ...configOriginal, ...config });
 
 	console.log("Press any key to exit");
-	process.stdin.setRawMode(true);
-	process.stdin.resume();
-	process.stdin.on("data", process.exit.bind(process, 0));
+	stdin.setRawMode(true);
+	stdin.resume();
+	stdin.on("data", process.exit.bind(process, 0));
 };
 
 main();

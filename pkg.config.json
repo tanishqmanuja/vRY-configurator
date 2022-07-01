@@ -13,6 +13,6 @@
 		"outputPath": "bin",
 		"assets": []
 	},
-	"pkgcache": "./pkg-cache",
+	"pkgcache": ".pkg-cache",
 	"pkgcompression": "gzip"
 }
