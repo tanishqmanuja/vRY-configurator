@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/app.js",
-    "build": "ncc build src/app.js && rimraf dist/config.json",
+    "build": "rimraf config.json && ncc build src/app.js",
     "package": "npm run build && pkg-exe -b"
   },
   "keywords": [],
