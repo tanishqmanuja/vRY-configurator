@@ -1,4 +1,5 @@
 node_modules
 bin
+dist
 config.json
 .pkg-cache

@@ -1,5 +1,5 @@
 {
-	"file": "app.js",
+	"file": "dist/index.js",
 	"icon": "assets/app.ico",
 	"name": "vRY-configurator",
 	"description": "Config editor for vRY",
@@ -12,5 +12,7 @@
 		],
 		"outputPath": "bin",
 		"assets": []
-	}
+	},
+	"pkgcache": "./pkg-cache",
+	"pkgcompression": "gzip"
 }
