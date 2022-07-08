@@ -1,65 +1,14 @@
 const { prompt, registerPrompt } = require("inquirer");
 const inquirerPrompt = require("inquirer-autocomplete-prompt");
-const { filter } = require("fuzzy");
-const { readFileSync, writeFileSync } = require("fs");
 const { join } = require("path");
 const { cwd, stdin } = require("process");
+const { basicQuestions } = require("./questions/basic.ques.js");
+const { advanceQuestions } = require("./questions/advance.ques.js");
+const { readJSONSync, writeJSONSync } = require("./utils/file.util.js");
 
 const CONFIG_PATH = join(cwd(), "./config.json");
 
-const WEAPONS = [
-	"Classic",
-	"Shorty",
-	"Frenzy",
-	"Ghost",
-	"Sheriff",
-
-	"Stinger",
-	"Spectre",
-	"Bucky",
-	"Judge",
-
-	"Bulldog",
-	"Guardian",
-	"Phantom",
-	"Vandal",
-
-	"Marshal",
-	"Operator",
-	"Ares",
-	"Odin",
-	"Melee",
-];
-
-const TABLE_OPTS = {
-	skin: "Skin",
-	rr: "Ranked Rating",
-	leaderboard: "Leaderboard Position",
-	peakrank: "Peak Rank",
-};
-
 registerPrompt("autocomplete", inquirerPrompt);
-
-const readJSONSync = filepath => {
-	try {
-		const buff = readFileSync(filepath, "utf-8");
-		return JSON.parse(buff);
-	} catch (error) {
-		return;
-	}
-};
-
-const writeJSONSync = (filepath, data) => {
-	try {
-		writeFileSync(filepath, JSON.stringify(data, null, 4));
-		console.log("Successfully configured vRY");
-	} catch {
-		console.log(`Error writing ${filepath}`);
-	}
-};
-
-const searchWeapons = (input = "") =>
-	filter(input, WEAPONS).map(el => el.original);
 
 const main = async () => {
 	const configDefault = {
@@ -74,31 +23,30 @@ const main = async () => {
 		},
 	};
 
-	let configOriginal = readJSONSync(CONFIG_PATH) || configDefault;
+	const configOriginal = readJSONSync(CONFIG_PATH) || configDefault;
 
-	const config = await prompt([
+	const menuChoices = [
+		"Basic Config (Suitable for most users)",
+		"Advance Config (I know what i am doing!)",
+	];
+
+	const { menuChoice } = await prompt([
 		{
-			type: "autocomplete",
-			name: "weapon",
-			message: "Select weapon to show skin: ",
-			source: (answers, input) => searchWeapons(input),
-		},
-		{
-			type: "checkbox",
-			name: "table",
-			message: "Select table options: ",
-			choices: Object.keys(TABLE_OPTS).map(key => ({
-				name: TABLE_OPTS[key],
-				value: key,
-				checked: configOriginal?.table?.[key] ?? true,
-			})),
-			filter: table =>
-				Object.keys(TABLE_OPTS).reduce(
-					(obj, key) => ({ ...obj, [key]: table.includes(key) }),
-					{}
-				),
+			type: "list",
+			name: "menuChoice",
+			message: "Please select type of configuration:",
+			default: 0,
+			choices: menuChoices,
+			filter: choice => menuChoices.indexOf(choice),
 		},
 	]);
+
+	let config;
+	if (menuChoice === 0) {
+		config = await prompt(basicQuestions(configOriginal));
+	} else if (menuChoice === 1) {
+		config = await prompt(advanceQuestions(configDefault));
+	}
 
 	writeJSONSync(CONFIG_PATH, { ...configOriginal, ...config });
 
